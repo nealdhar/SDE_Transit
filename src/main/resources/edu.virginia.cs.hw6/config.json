@@ -1,0 +1,7 @@
+{
+  "endpoints": {
+    "stops": "https://api.devhub.virginia.edu/v1/transit/bus-stops",
+    "lines": "https://api.devhub.virginia.edu/v1/transit/routes"
+  },
+  "database": "bus_stops.sqlite3"
+}
