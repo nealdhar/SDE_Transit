@@ -32,5 +32,8 @@ public class ConfigSingleton {
 
     private void setFieldsFromJSON() {
         //TODO: Population the three fields from the config.json file
+        busStopsURL = "https://api.devhub.virginia.edu/v1/transit/bus-stops" ;
+        busLinesURL = "https://api.devhub.virginia.edu/v1/transit/routes" ;
+        databaseName = "bus_stops.sqlite3" ;
     }
 }
