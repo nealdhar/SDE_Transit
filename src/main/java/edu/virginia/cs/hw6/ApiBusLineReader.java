@@ -95,6 +95,12 @@ public class ApiBusLineReader implements BusLineReader {
         List<BusLine> busLineList = busLineReader.getBusLines();
         for (BusLine busLine : busLineList) {
             System.out.println(busLine);
+            for(int i = 0; i < busLine.getRoute().size(); i++) {
+                System.out.println(busLine.getRoute().get(i).getId());
+                System.out.println(busLine.getRoute().get(i).getName());
+                System.out.println(busLine.getRoute().get(i).getLatitude());
+                System.out.println(busLine.getRoute().get(i).getLongitude());
+            }
         }
     }
 }
