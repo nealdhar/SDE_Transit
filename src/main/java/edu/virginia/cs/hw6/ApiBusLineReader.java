@@ -66,19 +66,6 @@ public class ApiBusLineReader implements BusLineReader {
                     }
                 }
 
-//                for(int k = 0; k < busRoutesList.length(); k++) {
-//                    JSONObject singleLine = busRoutesList.getJSONObject(k);
-//                    id = singleLine.getInt("id");
-//                    JSONArray stopsArray = singleLine.getJSONArray("stops");
-//                    for(int j = 0; j < stopsArray.length(); j++) {
-//                        for (Stop stop : stopList) {
-//                            if (stopsArray.getInt(j) == stop.getId()) {
-//                                singleRoute.addStop(stop);
-//                            }
-//                        }
-//                    }
-//                }
-
                 BusLine busLineObj = new BusLine(id, isActive, longName, shortName, singleRoute);
                 lineList.add(busLineObj);
             }
