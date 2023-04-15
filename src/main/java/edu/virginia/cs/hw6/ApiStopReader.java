@@ -5,65 +5,58 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApiStopReader implements StopReader {
-    ApiStopReader apiStopReader;
-    ConfigSingleton StopsConfig;
-    List<Stop> stops ;
     @Override
     public List<Stop> getStops() {
-        if (!stops.isEmpty()) {
-            return stops;
-        }
-        return null;
-    }
-
-    private JSONObject getJSONStringFromURL(String URL) {
+        List<Stop> stopList = new ArrayList<>();
+        ConfigSingleton config = ConfigSingleton.getInstance();
+        String busStopURLString = config.getBusStopsURL();
         try {
-            URL stopAPI = new URL(URL);
-            InputStream apiStream = stopAPI.openStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(apiStream, StandardCharsets.UTF_8);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String JSONString = bufferedReader.lines().collect(Collectors.joining());
-            bufferedReader.close();
-            JSONObject JSONStop = new JSONObject(JSONString);
-            return JSONStop;
+            URL busStopURL = new URL(busStopURLString);
+            URLConnection con = busStopURL.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+            StringBuffer sb = new StringBuffer();
+            String line;
+            while((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            in.close();
+
+            JSONObject stops = new JSONObject(sb.toString());
+            JSONArray stopsList = stops.getJSONArray("stops");
+
+            for(int i = 0; i < stopsList.length(); i++) {
+                JSONObject singleStop = stopsList.getJSONObject(i);
+                JSONArray posArray = singleStop.getJSONArray("position");
+                int id = singleStop.getInt("id");
+                String name = singleStop.getString("name");
+                double latitude = posArray.getDouble(0);
+                double longitude = posArray.getDouble(1);
+                Stop stopObj = new Stop(id, name, latitude, longitude);
+                stopList.add(stopObj);
+            }
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
+        return stopList;
     }
 
-
-    private Stop getStopFromJSON(JSONObject JSONStop) {
-        int id = JSONStop.getInt("id");
-        String name = JSONStop.getString("name");
-        JSONArray position = JSONStop.getJSONArray("position");
-        double latitude = position.getDouble(0);
-        double longitude = position.getDouble(1);
-        Stop stop = new Stop(id, name, latitude, longitude);
-        return stop;
-    }
-
-    protected JSONArray getJSONArrayFromAPI(String stop) {
-        String busStopsURL = StopsConfig.getBusStopsURL();
-        JSONObject busStops = apiStopReader.getJSONStringFromURL(busStopsURL);
-        JSONArray stops = busStops.getJSONArray(stop);
-        return stops;
-    }
-
-    protected void setStopsFromAPI() {
-        JSONArray JSONStops = getJSONArrayFromAPI("stops");
-        for (Object objectStop : JSONStops) {
-            JSONObject jsonStop = new JSONObject(objectStop);
-            Stop stop = getStopFromJSON(jsonStop);
-            stops.add(stop);
+    public static void main(String[] args) {
+        ApiStopReader stopsReader = new ApiStopReader();
+        List<Stop> stopList = stopsReader.getStops();
+        for(int i = 0; i < stopList.size(); i++) {
+            System.out.println(stopList.get(i).getId());
+            System.out.println(stopList.get(i).getName());
+            System.out.println(stopList.get(i).getLatitude());
+            System.out.println(stopList.get(i).getLongitude());
         }
-
     }
 }
