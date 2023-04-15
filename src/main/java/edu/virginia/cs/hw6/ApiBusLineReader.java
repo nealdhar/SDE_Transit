@@ -15,13 +15,14 @@ import java.util.List;
 public class ApiBusLineReader implements BusLineReader {
     @Override
     public List<BusLine> getBusLines() {
-        List<BusLine> busLineList = new ArrayList<>();
+        ApiStopReader stopReader = new ApiStopReader();
+        List<Stop> stopList = stopReader.getStops();
+        List<BusLine> lineList = new ArrayList<>();
         ConfigSingleton config = ConfigSingleton.getInstance();
-        String busLineURLString = config.getBusLinesURL();
-        String busStopURLString = config.getBusStopsURL();
-
+        String busLineURlString = config.getBusLinesURL();
+        String busRouteURLString = config.getBusStopsURL();
         try {
-        URL busLineURL = new URL(busLineURLString);
+            URL busLineURL = new URL(busLineURlString);
             URLConnection con = busLineURL.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
@@ -30,50 +31,70 @@ public class ApiBusLineReader implements BusLineReader {
             while((line = in.readLine()) != null) {
                 sb.append(line);
             }
-            URL busStopURL = new URL(busStopURLString);
-            URLConnection connection = busStopURL.openConnection();
-            BufferedReader in2 = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            in.close();
 
-            StringBuffer sb2 = new StringBuffer();
-            String lines;
-            while((lines = in2.readLine()) != null) {
-                sb2.append(lines);
-            in2.close();
+            URL busRouteURL = new URL(busRouteURLString);
+            URLConnection routeCon = busRouteURL.openConnection();
+            BufferedReader routeIn = new BufferedReader(new InputStreamReader(routeCon.getInputStream()));
+
+            StringBuffer sbRoute = new StringBuffer();
+            String routeLine;
+            while((routeLine = routeIn.readLine()) != null) {
+                sbRoute.append(routeLine);
+            }
+            routeIn.close();
 
             JSONObject busLines = new JSONObject(sb.toString());
-            JSONArray linesList = busLines.getJSONArray("lines");
-            JSONObject busRoutes = new JSONObject(sb2.toString());
-            JSONArray routesList = busRoutes.getJSONArray("routes");
-            ApiStopReader stopsReader = new ApiStopReader();
-            for(int i = 0; i < linesList.length(); i++) {
-                JSONObject singleLine = linesList.getJSONObject(i);
-                JSONArray lineArray = singleLine.getJSONArray("id");
-                JSONObject singleRoute = routesList.getJSONObject(i);
+            JSONObject busRoutes = new JSONObject(sbRoute.toString());
+            JSONArray busLinesList = busLines.getJSONArray("routes");
+            JSONArray busRoutesList = busRoutes.getJSONArray("routes");
+
+            for(int i = 0; i < busLinesList.length(); i++) {
+                Route singleRoute = new Route();
+                JSONObject singleBusLine = busLinesList.getJSONObject(i);
+                boolean isActive = singleBusLine.getBoolean("is_active");
+                String longName = singleBusLine.getString("long_name");
+                String shortName = singleBusLine.getString("short_name");
+                JSONObject singleLine = busRoutesList.getJSONObject(i);
                 int id = singleLine.getInt("id");
-                List stops = singleRoute.get
-                boolean isActive = singleLine.getBoolean("isActive");
-                String longName = singleLine.getString("longName");
-                String shortName = singleLine.getString("shortName");
-                List<Stop> allStops = stopsReader.getStops();
-                for (i = 0; i < routesList.length(); i++) {
-                    Stop stopInRoute = routesList.get(i);
-
-
+                JSONArray stopsArray = singleLine.getJSONArray("stops");
+                for(int k = 0; k < stopsArray.length(); k++) {
+                    for(Stop stop : stopList) {
+                        if(stopsArray.getInt(k) == stop.getId()) {
+                            singleRoute.addStop(stop);
+                        }
+                    }
                 }
 
+//                for(int k = 0; k < busRoutesList.length(); k++) {
+//                    JSONObject singleLine = busRoutesList.getJSONObject(k);
+//                    id = singleLine.getInt("id");
+//                    JSONArray stopsArray = singleLine.getJSONArray("stops");
+//                    for(int j = 0; j < stopsArray.length(); j++) {
+//                        for (Stop stop : stopList) {
+//                            if (stopsArray.getInt(j) == stop.getId()) {
+//                                singleRoute.addStop(stop);
+//                            }
+//                        }
+//                    }
+//                }
 
-                }
+                BusLine busLineObj = new BusLine(id, isActive, longName, shortName, singleRoute);
+                lineList.add(busLineObj);
+            }
 
-            } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-
-    } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
+
+        return lineList;
+    }
+
+    public static void main(String[] args) {
+        ApiBusLineReader busLineReader = new ApiBusLineReader();
+        List<BusLine> busLineList = busLineReader.getBusLines();
+        for (BusLine busLine : busLineList) {
+            System.out.println(busLine);
+        }
     }
 }
