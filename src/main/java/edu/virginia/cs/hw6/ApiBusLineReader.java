@@ -30,11 +30,10 @@ public class ApiBusLineReader implements BusLineReader {
             in.close();
 
             JSONObject lines = new JSONObject(sb.toString());
-            JSONArray linesList = lines.getJSONArray("lines");
+            JSONArray linesList = lines.getJSONArray("routes");
 
             for(int i = 0; i < linesList.length(); i++) {
                 JSONObject singleLine = linesList.getJSONObject(i);
-                JSONArray nameArray = singleLine.getJSONArray("position");
                 int id = singleLine.getInt("id");
                 boolean activity = singleLine.getBoolean("is_active");
                 String long_name = singleLine.getString("long_name");
@@ -57,5 +56,13 @@ public class ApiBusLineReader implements BusLineReader {
             throw new RuntimeException();
         }
         return busLineList;
+    }
+    public static void main(String[] args) {
+        ApiBusLineReader linesReader = new ApiBusLineReader();
+        List<BusLine> busLineList = linesReader.getBusLines();
+        for(int i = 0; i < busLineList.size(); i++) {
+            BusLine busLine = busLineList.get(i);
+            System.out.println(busLine.toString());
+        }
     }
 }
