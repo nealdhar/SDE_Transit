@@ -39,14 +39,23 @@ public class ApiBusLineReader implements BusLineReader {
                 boolean activity = singleLine.getBoolean("is_active");
                 String long_name = singleLine.getString("long_name");
                 String short_name = singleLine.getString("short_name");
-                BusLine busLine = new BusLine(id, activity, long_name, short_name);
+                Route route = new Route();
+                BusLine busLine = new BusLine(id, activity, long_name, short_name, route);
                 busLineList.add(busLine);
-            }
 
+                ApiStopReader stopReader = new ApiStopReader();
+                List<Stop> stops = stopReader.getStops();
+                for (Stop stop : stops) {
+                    int stopID = stop.getId();
+                    if(id == stopID) {
+                        route.addStop(stop);
+                    }
+                }
+            }
         }
         catch (IOException e) {
             throw new RuntimeException();
         }
-        return null;
+        return busLineList;
     }
 }
