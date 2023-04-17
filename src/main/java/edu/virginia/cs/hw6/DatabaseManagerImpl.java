@@ -37,17 +37,18 @@ public class DatabaseManagerImpl implements DatabaseManager {
         String createRoutesTable = "CREATE TABLE IF NOT EXISTS " +
                 "Routes (ID INTEGER AUTO_INCREMENT PRIMARY KEY, " +
                 "BusLineID INTEGER NOT NULL, " +
-                "FOREIGN KEY (BusLineID) REFERENCES BusLines(ID), " +
                 "StopID INTEGER NOT NULL, " +
-                "FOREIGN KEY (StopID) REFERENCES Stops(ID), " +
-                "Order INTEGER NOT NULL);";
+                "'Order' INTEGER NOT NULL," +
+                "FOREIGN KEY (BusLineID) REFERENCES BusLines(ID), " +
+                "FOREIGN KEY (StopID) REFERENCES Stops(ID))";
+
 
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(createStopsTable);
-            statement.executeUpdate(createBusLinesTable);
-            statement.executeUpdate(createRoutesTable);
+            statement.execute(createStopsTable);
+            statement.execute(createBusLinesTable);
+            statement.execute(createRoutesTable);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -109,5 +110,11 @@ public class DatabaseManagerImpl implements DatabaseManager {
     @Override
     public void disconnect() {
 
+    }
+
+    public static void main(String[] args) {
+        DatabaseManagerImpl databaseManager = new DatabaseManagerImpl();
+        databaseManager.connect();
+        databaseManager.createTables();
     }
 }
