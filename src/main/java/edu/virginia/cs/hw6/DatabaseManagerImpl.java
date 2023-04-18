@@ -116,7 +116,22 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void addStops(List<Stop> stopList) {
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
+        if (stopList.equals(null)) {
+            throw new IllegalArgumentException("Stop does not exist");
+        }
+        try {
+            Statement statement = connection.createStatement();
+            if(getAllStops().contains(stopList)) {
+                throw new IllegalArgumentException("Stop is already in database");
+            }
 
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
