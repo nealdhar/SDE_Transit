@@ -80,8 +80,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
             }
         try {
             DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet tables = metaData.getTables(null, null, null, new String[] {"TABLE"});
-            if (!tables.next()) {
+            ResultSet tablesData = metaData.getTables(null, null, null, new String[] {"TABLE"});
+            if (!tablesData.next()) {
                 throw new IllegalStateException("Tables do not exist in the database.");
             }
             Statement statement = connection.createStatement();
