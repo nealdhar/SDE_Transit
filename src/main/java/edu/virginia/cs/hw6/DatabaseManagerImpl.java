@@ -318,13 +318,70 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public BusLine getBusLineByLongName(String longName) {
-        return null;
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
+        String getBusLineByLongNameQuery = String.format("""
+                SELECT * FROM Buslines WHERE NAME LIKE ("%s") ORDER BY ID ASC;
+                """, "%" + longName + "%");
+        BusLine busLineObj = null;
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet busLineSet = statement.executeQuery(getBusLineByLongNameQuery);
+
+            int id = busLineSet.getInt("ID");
+            boolean is_active = busLineSet.getBoolean("is_active");
+            String short_name = busLineSet.getString("short_name");
+            String long_name = busLineSet.getString("long_name");
+            busLineObj = new BusLine(id, is_active, short_name, long_name);
+        } catch (SQLException e) {
+            if(e.getErrorCode() == 1) {
+                throw new IllegalStateException("BusLine table does not exist");
+            }
+            if(e.getErrorCode() == 0) {
+                throw new IllegalArgumentException("No busline with long_name " + longName + " found");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
+        }
+        return busLineObj;
     }
 
     @Override
     public BusLine getBusLineByShortName(String shortName) {
-        return null;
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
+        String getBusLineByShortNameQuery = String.format("""
+                SELECT * FROM Buslines WHERE NAME LIKE ("%s") ORDER BY ID ASC;
+                """, "%" + shortName + "%");
+        BusLine busLineObj = null;
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet busLineSet = statement.executeQuery(getBusLineByShortNameQuery);
+
+            int id = busLineSet.getInt("ID");
+            boolean is_active = busLineSet.getBoolean("is_active");
+            String short_name = busLineSet.getString("short_name");
+            String long_name = busLineSet.getString("long_name");
+            busLineObj = new BusLine(id, is_active, short_name, long_name);
+        } catch (SQLException e) {
+            if(e.getErrorCode() == 1) {
+                throw new IllegalStateException("Busline table does not exist");
+            }
+            if(e.getErrorCode() == 0) {
+                throw new IllegalArgumentException("No busline with short_name " + shortName + " found");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
+        }
+        return busLineObj;
     }
+
 
     @Override
     public void disconnect() {
