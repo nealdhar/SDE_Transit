@@ -258,7 +258,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
         if (connection == null) {
             throw new IllegalStateException("Database Manager is not yet connected.");
         }
-        String getBusLinesQuery = "SELECT * FROM Stops";
+        String getBusLinesQuery = "SELECT * FROM Buslines";
         List<BusLine> getBusLines = new ArrayList<>();
         Statement statement = null;
         try {
@@ -274,7 +274,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
             }
         } catch (SQLException e) {
             if(e.getErrorCode() == 1) {
-                throw new IllegalStateException("Stop table does not exist");
+                throw new IllegalStateException("Busline table does not exist");
             }
             else {
                 throw new RuntimeException(e);
@@ -289,7 +289,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
             throw new IllegalStateException("Database Manager is not yet connected.");
         }
         String getBusLineByIdQuery = String.format("""
-                    SELECT * FROM BusLines WHERE ID = (%d);
+                    SELECT * FROM Buslines WHERE ID = (%d);
                     """, id);
         BusLine busLineObj = null;
         Statement statement = null;
@@ -303,10 +303,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
             busLineObj = new BusLine(id, is_active, shortName, longName);
         } catch (SQLException e) {
             if(e.getErrorCode() == 1) {
-                throw new IllegalStateException("Stop table does not exist");
+                throw new IllegalStateException("Busline table does not exist");
             }
             if(e.getErrorCode() == 0) {
-                throw new IllegalArgumentException("No stop with ID " + id + " found");
+                throw new IllegalArgumentException("No busline with ID " + id + " found");
             }
             else {
                 throw new RuntimeException(e);
