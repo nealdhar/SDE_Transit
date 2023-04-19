@@ -12,7 +12,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
         if (connection != null) {
             throw new IllegalStateException("Database Manager is already connected.");
         }
-        String databaseURL = "jdbc:sqlite:bus_stops.sqlite3";
+        ConfigSingleton config = ConfigSingleton.getInstance();
+        String databaseName = config.getDatabaseFilename();
+        String databaseURL = "jdbc:sqlite:" + databaseName;
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(databaseURL);
@@ -116,22 +118,91 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void addStops(List<Stop> stopList) {
-
+        // Still need to add exception for if primary key already exists
+        String insertStopQuery = "";
+        for(int i = 0; i < stopList.size(); i++) {
+            int id = stopList.get(i).getId();
+            String name = stopList.get(i).getName();
+            double latitude = stopList.get(i).getLatitude();
+            double longitude = stopList.get(i).getLongitude();
+            insertStopQuery = String.format("""
+                    INSERT INTO Stops (ID, Name, Latitude, Longitude)
+                        VALUES (%d, "%s", %f, %f);
+                    """, id, name, latitude, longitude);
+            Statement statement = null;
+            try {
+                statement = connection.createStatement();
+                statement.executeUpdate(insertStopQuery);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
     public List<Stop> getAllStops() {
-        return null;
+        String getAllStopsQuery = "SELECT * FROM Stops";
+        List<Stop> allStopList = new ArrayList<>();
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet stop = statement.executeQuery(getAllStopsQuery);
+            while(stop.next()) {
+                int id = stop.getInt("ID");
+                String name = stop.getString("Name");
+                double latitude = stop.getDouble("Latitude");
+                double longitude = stop.getDouble("Longitude");
+                Stop stopObj = new Stop(id, name, latitude, longitude);
+                allStopList.add(stopObj);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return allStopList;
     }
 
     @Override
     public Stop getStopByID(int id) {
-        return null;
+        //Add exception if ID doesn't exist
+        String getStopByIdQuery = String.format("""
+                    SELECT * FROM Stops WHERE ID = (%d);
+                    """, id);
+        Stop stopObj = null;
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet stop = statement.executeQuery(getStopByIdQuery);
+
+            String name = stop.getString("Name");
+            double latitude = stop.getDouble("Latitude");
+            double longitude = stop.getDouble("Longitude");
+            stopObj = new Stop(id, name, latitude, longitude);
+            } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return stopObj;
     }
 
     @Override
     public Stop getStopByName(String substring) {
-        return null;
+        //Add exception if Name doesn't exist
+        String getStopByNameQuery = String.format("""
+                SELECT * FROM Stops WHERE NAME = ("%s");
+                """, substring);
+        Stop stopObj = null;
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet stop = statement.executeQuery(getStopByNameQuery);
+
+            int id = stop.getInt("ID");
+            double latitude = stop.getDouble("Latitude");
+            double longitude = stop.getDouble("Longitude");
+            stopObj = new Stop(id, substring, latitude, longitude);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return stopObj;
     }
 
     @Override
@@ -174,7 +245,43 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     public static void main(String[] args) {
         DatabaseManagerImpl databaseManager = new DatabaseManagerImpl();
+        ApiStopReader stopReader = new ApiStopReader();
+        List<Stop> stopReaderList = stopReader.getStops();
         databaseManager.connect();
-        databaseManager.createTables();
+
+        //Testing deleteTables
+//        databaseManager.deleteTables();
+
+        //Testing createTables
+//        databaseManager.createTables();
+
+        //Testing addStops
+//        databaseManager.addStops(stopReaderList);
+
+        //Testing getAllStops
+//        List<Stop> stopList = databaseManager.getAllStops();
+//        for(int i = 0; i < stopList.size(); i++) {
+//            System.out.println(stopList.get(i).getId());
+//            System.out.println(stopList.get(i).getName());
+//            System.out.println(stopList.get(i).getLatitude());
+//            System.out.println(stopList.get(i).getLongitude());
+
+        //Testing getStopById
+//        int stopID = 4245946;
+//        Stop stop = databaseManager.getStopByID(stopID);
+//        System.out.println(stop.getId());
+//        System.out.println(stop.getName());
+//        System.out.println(stop.getLatitude());
+//        System.out.println(stop.getLongitude());
+
+        //Testing
+//        String stopName = "Alderman Rd @ Facilities Management (Northbound)";
+//        Stop stop1 = databaseManager.getStopByName(stopName);
+//        System.out.println(stop1.getId());
+//        System.out.println(stop1.getName());
+//        System.out.println(stop1.getLatitude());
+//        System.out.println(stop1.getLongitude());
+
+
+        }
     }
-}
