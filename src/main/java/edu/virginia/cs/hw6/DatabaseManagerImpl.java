@@ -318,13 +318,13 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //        System.out.println(stop.getLatitude());
 //        System.out.println(stop.getLongitude());
 
-        //Testing
-        String stopName = "Hall";
-        Stop stop1 = databaseManager.getStopByName(stopName);
-        System.out.println(stop1.getId());
-        System.out.println(stop1.getName());
-        System.out.println(stop1.getLatitude());
-        System.out.println(stop1.getLongitude());
+        //Testing getStopByName
+//        String stopName = "Hall";
+//        Stop stop1 = databaseManager.getStopByName(stopName);
+//        System.out.println(stop1.getId());
+//        System.out.println(stop1.getName());
+//        System.out.println(stop1.getLatitude());
+//        System.out.println(stop1.getLongitude());
 
 
         }
