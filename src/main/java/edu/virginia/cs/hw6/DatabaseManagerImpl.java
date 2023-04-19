@@ -118,7 +118,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void addStops(List<Stop> stopList) {
-        // Still need to add exception for if primary key already exists
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
         String insertStopQuery = "";
         for(int i = 0; i < stopList.size(); i++) {
             int id = stopList.get(i).getId();
@@ -129,18 +131,30 @@ public class DatabaseManagerImpl implements DatabaseManager {
                     INSERT INTO Stops (ID, Name, Latitude, Longitude)
                         VALUES (%d, "%s", %f, %f);
                     """, id, name, latitude, longitude);
+
             Statement statement = null;
             try {
                 statement = connection.createStatement();
                 statement.executeUpdate(insertStopQuery);
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                if(e.getErrorCode() == 19) {
+                    throw new IllegalArgumentException("Stop is already in the database");
+                }
+                if(e.getErrorCode() == 1) {
+                    throw new IllegalStateException("Stop table does not exist");
+                }
+                else {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
 
     @Override
     public List<Stop> getAllStops() {
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
         String getAllStopsQuery = "SELECT * FROM Stops";
         List<Stop> allStopList = new ArrayList<>();
         Statement statement = null;
@@ -156,14 +170,21 @@ public class DatabaseManagerImpl implements DatabaseManager {
                 allStopList.add(stopObj);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if(e.getErrorCode() == 1) {
+                throw new IllegalStateException("Stop table does not exist");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
         }
         return allStopList;
     }
 
     @Override
     public Stop getStopByID(int id) {
-        //Add exception if ID doesn't exist
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
         String getStopByIdQuery = String.format("""
                     SELECT * FROM Stops WHERE ID = (%d);
                     """, id);
@@ -178,17 +199,27 @@ public class DatabaseManagerImpl implements DatabaseManager {
             double longitude = stop.getDouble("Longitude");
             stopObj = new Stop(id, name, latitude, longitude);
             } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if(e.getErrorCode() == 1) {
+                throw new IllegalStateException("Stop table does not exist");
+            }
+            if(e.getErrorCode() == 0) {
+                throw new IllegalArgumentException("No stop with ID " + id + " found");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
         }
         return stopObj;
     }
 
     @Override
     public Stop getStopByName(String substring) {
-        //Add exception if Name doesn't exist
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
         String getStopByNameQuery = String.format("""
-                SELECT * FROM Stops WHERE NAME = ("%s");
-                """, substring);
+                SELECT * FROM Stops WHERE NAME LIKE ("%s") ORDER BY ID ASC;
+                """, "%" + substring + "%");
         Stop stopObj = null;
         Statement statement = null;
         try {
@@ -196,18 +227,30 @@ public class DatabaseManagerImpl implements DatabaseManager {
             ResultSet stop = statement.executeQuery(getStopByNameQuery);
 
             int id = stop.getInt("ID");
+            String name = stop.getString("Name");
             double latitude = stop.getDouble("Latitude");
             double longitude = stop.getDouble("Longitude");
-            stopObj = new Stop(id, substring, latitude, longitude);
+            stopObj = new Stop(id, name, latitude, longitude);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if(e.getErrorCode() == 1) {
+                throw new IllegalStateException("Stop table does not exist");
+            }
+            if(e.getErrorCode() == 0) {
+                throw new IllegalArgumentException("No stop with name " + substring + " found");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
         }
         return stopObj;
     }
 
     @Override
     public void addBusLines(List<BusLine> busLineList) {
+        String insertBusLineQuery = "";
+        for(int i = 0; i < busLineList.size(); i++) {
 
+        }
     }
 
     @Override
@@ -265,9 +308,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //            System.out.println(stopList.get(i).getName());
 //            System.out.println(stopList.get(i).getLatitude());
 //            System.out.println(stopList.get(i).getLongitude());
+//        }
 
         //Testing getStopById
-//        int stopID = 4245946;
+//        int stopID = 123;
 //        Stop stop = databaseManager.getStopByID(stopID);
 //        System.out.println(stop.getId());
 //        System.out.println(stop.getName());
@@ -275,12 +319,12 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //        System.out.println(stop.getLongitude());
 
         //Testing
-//        String stopName = "Alderman Rd @ Facilities Management (Northbound)";
-//        Stop stop1 = databaseManager.getStopByName(stopName);
-//        System.out.println(stop1.getId());
-//        System.out.println(stop1.getName());
-//        System.out.println(stop1.getLatitude());
-//        System.out.println(stop1.getLongitude());
+        String stopName = "Hall";
+        Stop stop1 = databaseManager.getStopByName(stopName);
+        System.out.println(stop1.getId());
+        System.out.println(stop1.getName());
+        System.out.println(stop1.getLatitude());
+        System.out.println(stop1.getLongitude());
 
 
         }
