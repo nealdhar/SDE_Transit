@@ -352,9 +352,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
             statement = connection.createStatement();
             ResultSet busLineSet = statement.executeQuery(getBusLineByIdQuery);
 
-            boolean is_active = busLineSet.getBoolean("is_active");
-            String shortName = busLineSet.getString("short_name");
-            String longName = busLineSet.getString("long_name");
+            boolean is_active = busLineSet.getBoolean("IsActive");
+            String shortName = busLineSet.getString("ShortName");
+            String longName = busLineSet.getString("LongName");
             busLineObj = new BusLine(id, is_active, shortName, longName);
         } catch (SQLException e) {
             if(e.getErrorCode() == 1) {
@@ -386,9 +386,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
             ResultSet busLineSet = statement.executeQuery(getBusLineByLongNameQuery);
 
             int id = busLineSet.getInt("ID");
-            boolean is_active = busLineSet.getBoolean("is_active");
-            String short_name = busLineSet.getString("short_name");
-            String long_name = busLineSet.getString("long_name");
+            boolean is_active = busLineSet.getBoolean("IsActive");
+            String short_name = busLineSet.getString("ShortName");
+            String long_name = busLineSet.getString("LongName");
             busLineObj = new BusLine(id, is_active, short_name, long_name);
         } catch (SQLException e) {
             if(e.getErrorCode() == 1) {
@@ -419,9 +419,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
             ResultSet busLineSet = statement.executeQuery(getBusLineByShortNameQuery);
 
             int id = busLineSet.getInt("ID");
-            boolean is_active = busLineSet.getBoolean("is_active");
-            String short_name = busLineSet.getString("short_name");
-            String long_name = busLineSet.getString("long_name");
+            boolean is_active = busLineSet.getBoolean("IsActive");
+            String short_name = busLineSet.getString("ShortName");
+            String long_name = busLineSet.getString("LongName");
             busLineObj = new BusLine(id, is_active, short_name, long_name);
         } catch (SQLException e) {
             if(e.getErrorCode() == 1) {
@@ -462,7 +462,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
         List<BusLine> busLineReaderList = busLineReader.getBusLines();
         databaseManager.connect();
 
-//        databaseManager.createTables();
+        databaseManager.createTables();
 //        databaseManager.disconnect();
 
         //Testing deleteTables
