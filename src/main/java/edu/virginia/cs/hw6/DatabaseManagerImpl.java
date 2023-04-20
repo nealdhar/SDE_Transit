@@ -281,7 +281,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
             String shortName = busLineList.get(i).getShortName();
             insertBusLineQuery = String.format("""
                     INSERT INTO BusLine (ID, IsActive, LongName, ShortName)
-                        VALUES (%d, %d, "%s", %s);
+                        VALUES (%d, %b, "%s", %s);
                     """, id, is_active, longName, shortName);
             insertRouteQuery = String.format("""
                     INSERT INTO Routes (BusLineID, RoutesID, \"Order\"); """,
@@ -469,7 +469,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //        databaseManager.deleteTables();
 
         //Testing createTables
-//        databaseManager.createTables();
+//       databaseManager.createTables();
 
         //Testing addStops
 //       databaseManager.addStops(stopReaderList);
@@ -505,7 +505,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
         // BUS LINE TESTING //
         // Testing addBusLines()
-        //databaseManager.addBusLines(busLineReaderList);
+        databaseManager.addBusLines(busLineReaderList);
 
         // Testing getBusLines()
 //        List<BusLine> busLineList = databaseManager.getBusLines();
