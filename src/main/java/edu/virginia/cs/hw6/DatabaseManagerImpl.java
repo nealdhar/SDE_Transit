@@ -85,17 +85,16 @@ public class DatabaseManagerImpl implements DatabaseManager {
                 throw new IllegalStateException("Tables do not exist in the database.");
             }
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT name FROM sqlite_master" +
-                    "WHERE type = 'table';");
+            ResultSet resultSet = statement.executeQuery("SELECT name FROM sqlite_master WHERE type = 'table';");
             List<String> tables = new ArrayList<>();
             while (resultSet.next()) {
                 tables.add(resultSet.getString(1));
             }
             for (String table : tables) {
-                statement.executeUpdate("DELTE FROM" + table + ";");
+                statement.executeUpdate("DELETE FROM " + table + ";");
             }
+            System.out.println("Tables and data have been cleared");
             statement.close();
-            connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -438,8 +437,11 @@ public class DatabaseManagerImpl implements DatabaseManager {
             throw new IllegalStateException("Database Manager connection has not yet been made.");
         }
         try {
-            connection.commit();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
             connection.close();
+            connection = null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -450,6 +452,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
         ApiStopReader stopReader = new ApiStopReader();
         List<Stop> stopReaderList = stopReader.getStops();
         databaseManager.connect();
+
+//        databaseManager.createTables();
+//        databaseManager.disconnect();
 
         //Testing deleteTables
 //        databaseManager.deleteTables();
