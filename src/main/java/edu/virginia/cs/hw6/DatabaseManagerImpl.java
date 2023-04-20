@@ -57,7 +57,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
                     "Routes (ID INTEGER AUTO_INCREMENT PRIMARY KEY, " +
                     "BusLineID INTEGER NOT NULL, " +
                     "StopID INTEGER NOT NULL, " +
-                    "'Order' INTEGER NOT NULL," +
+                    "\"Order\" INTEGER NOT NULL," +
                     "FOREIGN KEY (BusLineID) REFERENCES BusLines(ID), " +
                     "FOREIGN KEY (StopID) REFERENCES Stops(ID))";
 
@@ -273,20 +273,27 @@ public class DatabaseManagerImpl implements DatabaseManager {
             throw new IllegalStateException("Database Manager is not yet connected.");
         }
         String insertBusLineQuery = "";
+        String insertRouteQuery = "" ;
         for(int i = 0; i < busLineList.size(); i++) {
             int id = busLineList.get(i).getId();
+            boolean is_active = busLineList.get(i).isActive();
             String longName = busLineList.get(i).getLongName();
             String shortName = busLineList.get(i).getShortName();
-            Route route = busLineList.get(i).getRoute();
             insertBusLineQuery = String.format("""
-                    INSERT INTO BusLine (ID, short_name, long_name, Route)
-                        VALUES (%d, "%s", %s, %r);
-                    """, id, longName, shortName, route);
-
+                    INSERT INTO BusLine (ID, IsActive, LongName, ShortName)
+                        VALUES (%d, %d, "%s", %s);
+                    """, id, is_active, longName, shortName);
+            insertRouteQuery = String.format("""
+                    INSERT INTO Routes (BusLineID, RoutesID, \"Order\"); """,
+                    id, is_active, longName, shortName);
             Statement statement = null;
+            Statement routeStatement = null;
             try {
                 statement = connection.createStatement();
                 statement.executeUpdate(insertBusLineQuery);
+                routeStatement = connection.createStatement();
+                routeStatement.executeUpdate(insertRouteQuery);
+
             } catch (SQLException e) {
                 if(e.getErrorCode() == 19) {
                     throw new IllegalArgumentException("BusLine is already in the database");
@@ -314,10 +321,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
             ResultSet busLineSet = statement.executeQuery(getBusLinesQuery);
             while(busLineSet.next()) {
                 int id = busLineSet.getInt("ID");
-                boolean is_active = busLineSet.getBoolean("is_active");
-                String shortName = busLineSet.getString("short_name");
-                String longName = busLineSet.getString("long_name");
-                BusLine busLineObj = new BusLine(id, is_active, shortName, longName);
+                boolean is_active = busLineSet.getBoolean("IsActive");
+                String longName = busLineSet.getString("LongName");
+                String shortName = busLineSet.getString("ShortName");
+                BusLine busLineObj = new BusLine(id, is_active, longName, shortName);
                 getBusLines.add(busLineObj);
             }
         } catch (SQLException e) {
@@ -451,6 +458,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
         DatabaseManagerImpl databaseManager = new DatabaseManagerImpl();
         ApiStopReader stopReader = new ApiStopReader();
         List<Stop> stopReaderList = stopReader.getStops();
+        ApiBusLineReader busLineReader = new ApiBusLineReader();
+        List<BusLine> busLineReaderList = busLineReader.getBusLines();
         databaseManager.connect();
 
 //        databaseManager.createTables();
@@ -463,17 +472,20 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //        databaseManager.createTables();
 
         //Testing addStops
-//        databaseManager.addStops(stopReaderList);
+//       databaseManager.addStops(stopReaderList);
 
         //Testing getAllStops
-//        List<Stop> stopList = databaseManager.getAllStops();
-//        for(int i = 0; i < stopList.size(); i++) {
-//            System.out.println(stopList.get(i).getId());
-//            System.out.println(stopList.get(i).getName());
-//            System.out.println(stopList.get(i).getLatitude());
-//            System.out.println(stopList.get(i).getLongitude());
-//        }
-
+        /*List<Stop> stopList = databaseManager.getAllStops();
+        int count = 0;
+        for(int i = 0; i < stopList.size(); i++) {
+            System.out.println(stopList.get(i).getId());
+            System.out.println(stopList.get(i).getName());
+            System.out.println(stopList.get(i).getLatitude());
+            System.out.println(stopList.get(i).getLongitude());
+            count++;
+        }
+        System.out.println(count);
+         */
         //Testing getStopById
 //        int stopID = 123;
 //        Stop stop = databaseManager.getStopByID(stopID);
@@ -492,9 +504,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
 
         // BUS LINE TESTING //
-
         // Testing addBusLines()
-//        databaseManager.addBusLines(busLineReaderList);
+        //databaseManager.addBusLines(busLineReaderList);
 
         // Testing getBusLines()
 //        List<BusLine> busLineList = databaseManager.getBusLines();
