@@ -75,11 +75,15 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
         @Override
     public void clear() {
-        // Still need to add IllegalStateException if tables don't exist
             if (connection == null) {
                 throw new IllegalStateException("Database Manager is not yet connected.");
             }
         try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet tablesData = metaData.getTables(null, null, null, new String[] {"TABLE"});
+            if (!tablesData.next()) {
+                throw new IllegalStateException("Tables do not exist in the database.");
+            }
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT name FROM sqlite_master" +
                     "WHERE type = 'table';");
@@ -99,11 +103,30 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void deleteTables() {
-        // Still need to add IllegalStateException if tables don't exist
         if (connection == null) {
             throw new IllegalStateException("Database Manager connection has not yet been made.");
         }
         try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet tables = metaData.getTables(null, null, null, new String[] {"TABLE"});
+            boolean stopsExists = false;
+            boolean busLinesExists = false;
+            boolean routesExists = false;
+            while (tables.next()) {
+                String table = tables.getString("TABLE_NAME");
+                if (table.equals("Stops")) {
+                    stopsExists = true;
+                }
+                if (table.equals("BusLines")) {
+                    busLinesExists = true;
+                }
+                if (table.equals("Routes")) {
+                    routesExists = true;
+                }
+            }
+            if (!stopsExists || !busLinesExists || !routesExists) {
+                throw new IllegalStateException("Tables do not exist in the database.");
+            }
             Statement statement = connection.createStatement();
             String deleteStops = "DROP TABLE IF EXISTS Stops;";
             String deleteBusLines = "DROP TABLE IF EXISTS BusLines;";
