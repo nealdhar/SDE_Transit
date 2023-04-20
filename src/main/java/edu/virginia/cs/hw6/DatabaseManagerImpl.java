@@ -247,11 +247,38 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void addBusLines(List<BusLine> busLineList) {
+        if (connection == null) {
+            throw new IllegalStateException("Database Manager is not yet connected.");
+        }
         String insertBusLineQuery = "";
         for(int i = 0; i < busLineList.size(); i++) {
+            int id = busLineList.get(i).getId();
+            String longName = busLineList.get(i).getLongName();
+            String shortName = busLineList.get(i).getShortName();
+            Route route = busLineList.get(i).getRoute();
+            insertBusLineQuery = String.format("""
+                    INSERT INTO BusLine (ID, short_name, long_name, Route)
+                        VALUES (%d, "%s", %s, %r);
+                    """, id, longName, shortName, route);
 
+            Statement statement = null;
+            try {
+                statement = connection.createStatement();
+                statement.executeUpdate(insertBusLineQuery);
+            } catch (SQLException e) {
+                if(e.getErrorCode() == 19) {
+                    throw new IllegalArgumentException("BusLine is already in the database");
+                }
+                if(e.getErrorCode() == 1) {
+                    throw new IllegalStateException("BusLine table does not exist");
+                }
+                else {
+                    throw new RuntimeException(e);
+                }
+            }
         }
-    }
+        }
+
 
     @Override
     public List<BusLine> getBusLines() {
