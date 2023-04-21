@@ -420,7 +420,12 @@ public class DatabaseManagerImpl implements DatabaseManager {
                     statement1.close();
                     routesSet.close();
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    if (e.getErrorCode() == 1) {
+                        throw new IllegalStateException("BusLines, Routes, or Stops table does not exist");
+                    }
+                    else {
+                        throw new RuntimeException(e);
+                    }
                 }
                 BusLine busLine = new BusLine(id, is_active, shortName, longName, busRoute);
                 busLinesList.add(busLine);
@@ -429,7 +434,12 @@ public class DatabaseManagerImpl implements DatabaseManager {
             statement.close();
             busLineSet.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (e.getErrorCode() == 1) {
+                throw new IllegalStateException("BusLines, Routes, or Stops table does not exist");
+            }
+            else {
+                throw new RuntimeException(e);
+            }
         }
         return busLinesList;
     }
