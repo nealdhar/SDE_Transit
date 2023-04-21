@@ -48,15 +48,4 @@ public class ApiStopReader implements StopReader {
         }
         return stopList;
     }
-
-    public static void main(String[] args) {
-        ApiStopReader stopsReader = new ApiStopReader();
-        List<Stop> stopList = stopsReader.getStops();
-        for(int i = 0; i < stopList.size(); i++) {
-            System.out.println(stopList.get(i).getId());
-            System.out.println(stopList.get(i).getName());
-            System.out.println(stopList.get(i).getLatitude());
-            System.out.println(stopList.get(i).getLongitude());
-        }
-    }
 }

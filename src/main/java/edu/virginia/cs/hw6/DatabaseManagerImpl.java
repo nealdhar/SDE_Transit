@@ -321,6 +321,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
                     INSERT INTO BusLines (ID, IsActive, LongName, ShortName)
                         VALUES (%d, %b, "%s", "%s");
                     """, id, is_active, longName, shortName);
+
+
                 Statement statement = null;
                 try {
                     statement = connection.createStatement();
@@ -359,14 +361,13 @@ public class DatabaseManagerImpl implements DatabaseManager {
                 }
 
                 insertRouteQuery = String.format("""
-                        INSERT INTO Routes (BusLineID, StopID, \"Order\")
-                            VALUES (%d, %d, %d));
+                        INSERT INTO Routes (BusLineID, StopID, \'Order\')
+                            VALUES (%d, %d, %d);
                         """, id, stopID, j);
                 Statement routeStatement = null;
                 try {
                     routeStatement = connection.createStatement();
                     routeStatement.executeUpdate(insertRouteQuery);
-
                     routeStatement.close();
                 } catch (SQLException e) {
 
@@ -738,7 +739,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //       databaseManager.createTables();
 
         //Testing addStops
-       databaseManager.addStops(stopReaderList);
+//       databaseManager.addStops(stopReaderList);
 
         //Testing getAllStops
 //        List<Stop> stopList = databaseManager.getAllStops();
@@ -773,6 +774,9 @@ public class DatabaseManagerImpl implements DatabaseManager {
         // Testing addBusLines()
 //        databaseManager.createTables();
 //        databaseManager.deleteTables();
+        databaseManager.clear();
+        databaseManager.addStops(stopReaderList);
+//        databaseManager.clear();
         databaseManager.addBusLines(busLineReaderList);
 
         // Testing getBusLines()
@@ -811,7 +815,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
 //        }
 
         // Testing getBusLineByShortName()
-//        String shortName = "lvE";
+//        String shortName = "lovE";
 //        BusLine busLine = databaseManager.getBusLineByShortName(shortName);
 //        System.out.println(busLine.getId());
 //        System.out.println(busLine.isActive());
