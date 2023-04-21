@@ -94,7 +94,6 @@ public class DatabaseManagerImpl implements DatabaseManager {
             for (String table : tables) {
                 statement.executeUpdate("DELETE FROM " + table + ";");
             }
-            System.out.println("Tables and data have been cleared");
 
             tablesData.close();
             resultSet.close();
