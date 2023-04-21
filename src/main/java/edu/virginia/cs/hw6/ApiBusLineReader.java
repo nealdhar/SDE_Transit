@@ -55,29 +55,20 @@ public class ApiBusLineReader implements BusLineReader {
                 boolean isActive = singleBusLine.getBoolean("is_active");
                 String longName = singleBusLine.getString("long_name");
                 String shortName = singleBusLine.getString("short_name");
-                JSONObject singleLine = busRoutesList.getJSONObject(i);
-                int id = singleLine.getInt("id");
-                JSONArray stopsArray = singleLine.getJSONArray("stops");
-                for(int k = 0; k < stopsArray.length(); k++) {
-                    for(Stop stop : stopList) {
-                        if(stopsArray.getInt(k) == stop.getId()) {
-                            singleRoute.addStop(stop);
+                int id = singleBusLine.getInt("id");
+                for(int j = 0; j < busRoutesList.length(); j++) {
+                    JSONObject singleLine = busRoutesList.getJSONObject(j);
+                    if(id == singleLine.getInt("id")) {
+                        JSONArray stopsArray = singleLine.getJSONArray("stops");
+                        for (int k = 0; k < stopsArray.length(); k++) {
+                            for (Stop stop : stopList) {
+                                if (stopsArray.getInt(k) == stop.getId()) {
+                                    singleRoute.addStop(stop);
+                                }
+                            }
                         }
                     }
                 }
-
-//                for(int k = 0; k < busRoutesList.length(); k++) {
-//                    JSONObject singleLine = busRoutesList.getJSONObject(k);
-//                    id = singleLine.getInt("id");
-//                    JSONArray stopsArray = singleLine.getJSONArray("stops");
-//                    for(int j = 0; j < stopsArray.length(); j++) {
-//                        for (Stop stop : stopList) {
-//                            if (stopsArray.getInt(j) == stop.getId()) {
-//                                singleRoute.addStop(stop);
-//                            }
-//                        }
-//                    }
-//                }
 
                 BusLine busLineObj = new BusLine(id, isActive, longName, shortName, singleRoute);
                 lineList.add(busLineObj);
